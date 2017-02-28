@@ -20,3 +20,8 @@ ucp-bundle-admin
 env.sh
 *.ps1
 .DS_Store
+ucp-nfs-node1
+dtr-nfs-node1
+dtr-nfs-node2
+dtr-nfs-node3
+nfs-server-node

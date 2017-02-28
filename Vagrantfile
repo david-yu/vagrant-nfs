@@ -47,7 +47,7 @@ Vagrant.configure(2) do |config|
      SHELL
     end
 
-    # DTR Node 1 for DDC setup
+    # DTR Node 1 for DDC
     config.vm.define "dtr-nfs-node1" do |dtr_vancouver_node1|
       dtr_vancouver_node1.vm.box = "ubuntu/xenial64"
       dtr_vancouver_node1.vm.network "private_network", ip: "172.28.128.22"
@@ -86,9 +86,9 @@ Vagrant.configure(2) do |config|
         sleep 30
         # Install DTR
         curl -k https://${UCP_IPADDR}/ca > ucp-ca.pem
-        docker run --rm docker/dtr:2.2.1 install --hub-username ${HUB_USERNAME} --hub-password ${HUB_PASSWORD} --ucp-url https://${UCP_IPADDR} --ucp-node dtr --replica-id ${DTR_REPLICA_ID} --dtr-external-url https://${DTR_IPADDR} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)"
+        docker run --rm docker/dtr:2.2.2 install --hub-username ${HUB_USERNAME} --hub-password ${HUB_PASSWORD} --ucp-url https://${UCP_IPADDR} --ucp-node dtr --replica-id ${DTR_REPLICA_ID} --dtr-external-url https://${DTR_IPADDR} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)"
         # Run backup of DTR
-        docker run --rm docker/dtr:2.2.1 backup --ucp-url https://${UCP_IPADDR} --existing-replica-id ${DTR_REPLICA_ID} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)" > /tmp/backup.tar
+        docker run --rm docker/dtr:2.2.2 backup --ucp-url https://${UCP_IPADDR} --existing-replica-id ${DTR_REPLICA_ID} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)" > /tmp/backup.tar
         # Trust self-signed DTR CA
         openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
         sudo update-ca-certificates
@@ -98,7 +98,7 @@ Vagrant.configure(2) do |config|
       SHELL
     end
 
-    # Application Worker Node 1
+    # DTR Node 2 for DDC
     config.vm.define "dtr-nfs-node2" do |worker_node1|
       worker_node1.vm.box = "ubuntu/xenial64"
       worker_node1.vm.network "private_network", ip: "172.28.128.23"
@@ -123,8 +123,11 @@ Vagrant.configure(2) do |config|
        # Join Swarm as worker
        export UCP_IPADDR=$(cat /vagrant/ucp-nfs-node1)
        export DTR_IPADDR=$(cat /vagrant/dtr-nfs-node2)
+       export UCP_PASSWORD=$(cat /vagrant/ucp_password)
        export SWARM_JOIN_TOKEN_WORKER=$(cat /vagrant/swarm-join-token-worker)
        docker swarm join --token ${SWARM_JOIN_TOKEN_WORKER} ${UCP_IPADDR}:2377
+       # Join DTR as a replica
+       docker run -it --rm docker/dtr join --ucp-url https://${UCP_IPADDR} --ucp-node engine06 --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)"
        # Trust self-signed DTR CA
        openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
        sudo update-ca-certificates
@@ -132,7 +135,7 @@ Vagrant.configure(2) do |config|
      SHELL
     end
 
-    # Application Worker Node 2
+    # DTR Node 3 for DDC
     config.vm.define "dtr-nfs-node3" do |worker_node2|
       worker_node2.vm.box = "ubuntu/xenial64"
       worker_node2.vm.network "private_network", ip: "172.28.128.24"

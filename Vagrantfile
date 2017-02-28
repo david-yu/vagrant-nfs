@@ -35,7 +35,7 @@ Vagrant.configure(2) do |config|
        export HUB_USERNAME=$(cat /vagrant/hub_username)
        export HUB_PASSWORD=$(cat /vagrant/hub_password)
        sudo sh -c "echo '${UCP_IPADDR} ucp.local' >> /etc/hosts"
-       sudo sh -c "echo '172.28.128.11 dtr.local' >> /etc/hosts"
+       sudo sh -c "echo '172.28.128.21 dtr.local' >> /etc/hosts"
        docker login -u ${HUB_USERNAME} -p ${HUB_PASSWORD}
        docker pull docker/ucp:2.1.0
        docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock -v /vagrant/docker_subscription.lic:/docker_subscription.lic docker/ucp:2.1.0 install --host-address ${UCP_IPADDR} --admin-password ${UCP_PASSWORD} --san ucp.local
@@ -195,7 +195,7 @@ Vagrant.configure(2) do |config|
          export HUB_USERNAME=$(cat /vagrant/hub_username)
          export HUB_PASSWORD=$(cat /vagrant/hub_password)
          sudo sh -c "echo '${UCP_IPADDR} ucp.local' >> /etc/hosts"
-         sudo sh -c "echo '172.28.128.11 dtr.local' >> /etc/hosts"
+         sudo sh -c "echo '${DTR_IPADDR} dtr.local' >> /etc/hosts"
          sudo mkdir /var/nfs/dtr -p
          sudo chown nobody:nogroup /var/nfs/dtr
          sudo sh -c "echo '/var/nfs/jenkins    10.10.4.110(rw,sync,no_subtree_check)' >> /etc/exports"

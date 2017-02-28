@@ -4,9 +4,9 @@ Vagrant Virtualbox setup for CS Engine 1.13.1-cs1, UCP 2.1.0 and DTR 2.2.1 with 
 The following set of instructions helps Docker DataCenter across multiple vms with static ip addresses:
 
 * UCP - ucp.local on 172.28.128.20
-* DTR - dtr.local on 172.28.128.21
-* Worker node - worker-node1 on 172.28.128.22
-* Worker node - worker-node2 on 172.28.128.23
+* Worker node - DTR replica, `dtr-nfs-node1` on 172.28.128.21
+* Worker node - DTR replica `dtr-nfs-node2` on 172.28.128.22
+* Worker node - DTR replica, `dtr-nfs-node3` on 172.28.128.23
 
 ## Download vagrant from Vagrant website
 

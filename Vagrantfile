@@ -15,7 +15,7 @@ Vagrant.configure(2) do |config|
   # UCP 2.1 node for DDC
     config.vm.define "ucp-nfs-node1" do |ucp_vancouver_node1|
       ucp_vancouver_node1.vm.box = "ubuntu/xenial64"
-      ucp_vancouver_node1.vm.network "private_network", ip: "172.28.128.20"
+      ucp_vancouver_node1.vm.network "private_network", ip: "172.28.128.21"
       ucp_vancouver_node1.vm.hostname = "ucp.local"
       config.vm.provider :virtualbox do |vb|
          vb.customize ["modifyvm", :id, "--memory", "2048"]
@@ -50,7 +50,7 @@ Vagrant.configure(2) do |config|
     # DTR Node 1 for DDC setup
     config.vm.define "dtr-nfs-node1" do |dtr_vancouver_node1|
       dtr_vancouver_node1.vm.box = "ubuntu/xenial64"
-      dtr_vancouver_node1.vm.network "private_network", ip: "172.28.128.21"
+      dtr_vancouver_node1.vm.network "private_network", ip: "172.28.128.22"
       dtr_vancouver_node1.vm.hostname = "dtr.local"
       config.vm.provider :virtualbox do |vb|
          vb.customize ["modifyvm", :id, "--memory", "2048"]
@@ -101,7 +101,7 @@ Vagrant.configure(2) do |config|
     # Application Worker Node 1
     config.vm.define "dtr-nfs-node2" do |worker_node1|
       worker_node1.vm.box = "ubuntu/xenial64"
-      worker_node1.vm.network "private_network", ip: "172.28.128.22"
+      worker_node1.vm.network "private_network", ip: "172.28.128.23"
       worker_node1.vm.hostname = "dtr-nfs-node2"
       config.vm.provider :virtualbox do |vb|
          vb.customize ["modifyvm", :id, "--memory", "2048"]
@@ -135,7 +135,7 @@ Vagrant.configure(2) do |config|
     # Application Worker Node 2
     config.vm.define "dtr-nfs-node3" do |worker_node2|
       worker_node2.vm.box = "ubuntu/xenial64"
-      worker_node2.vm.network "private_network", ip: "172.28.128.23"
+      worker_node2.vm.network "private_network", ip: "172.28.128.24"
       worker_node2.vm.hostname = "dtr-nfs-node3"
       config.vm.provider :virtualbox do |vb|
          vb.customize ["modifyvm", :id, "--memory", "2048"]
@@ -173,5 +173,34 @@ Vagrant.configure(2) do |config|
        sudo mkdir -p /home/ubuntu/notary-config/.docker/trust
      SHELL
     end
+
+    # NFS node for DDC
+      config.vm.define "nfs-server-node" do |ucp_vancouver_node1|
+        ucp_vancouver_node1.vm.box = "ubuntu/xenial64"
+        ucp_vancouver_node1.vm.network "private_network", ip: "172.28.128.20"
+        ucp_vancouver_node1.vm.hostname = "ucp.local"
+        config.vm.provider :virtualbox do |vb|
+           vb.customize ["modifyvm", :id, "--memory", "2048"]
+           vb.customize ["modifyvm", :id, "--cpus", "2"]
+           vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+           vb.name = "nfs-server-node"
+        end
+        ucp_vancouver_node1.vm.provision "shell", inline: <<-SHELL
+         sudo apt-get update
+         sudo apt-get install -y apt-transport-https ca-certificates ntpdate nfs-kernel-server
+         sudo ntpdate -s time.nist.gov
+         ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/ucp-vancouver-node1-ipaddr
+         export UCP_IPADDR=$(cat /vagrant/ucp-vancouver-node1-ipaddr)
+         export UCP_PASSWORD=$(cat /vagrant/ucp_password)
+         export HUB_USERNAME=$(cat /vagrant/hub_username)
+         export HUB_PASSWORD=$(cat /vagrant/hub_password)
+         sudo sh -c "echo '${UCP_IPADDR} ucp.local' >> /etc/hosts"
+         sudo sh -c "echo '172.28.128.11 dtr.local' >> /etc/hosts"
+         sudo mkdir /var/nfs/dtr -p
+         sudo chown nobody:nogroup /var/nfs/dtr
+         sudo sh -c "echo '/var/nfs/jenkins    10.10.4.110(rw,sync,no_subtree_check)' >> /etc/exports"
+         sudo service nfs-kernel-server restart
+       SHELL
+      end
 
 end

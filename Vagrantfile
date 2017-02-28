@@ -13,7 +13,7 @@ Vagrant.configure(2) do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
   # UCP 2.1 node for DDC
-    config.vm.define "ucp-vancouver-node1" do |ucp_vancouver_node1|
+    config.vm.define "ucp-nfs-node1" do |ucp_vancouver_node1|
       ucp_vancouver_node1.vm.box = "ubuntu/xenial64"
       ucp_vancouver_node1.vm.network "private_network", ip: "172.28.128.20"
       ucp_vancouver_node1.vm.hostname = "ucp.local"
@@ -21,7 +21,7 @@ Vagrant.configure(2) do |config|
          vb.customize ["modifyvm", :id, "--memory", "2048"]
          vb.customize ["modifyvm", :id, "--cpus", "2"]
          vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-         vb.name = "ucp-vancouver-node1"
+         vb.name = "ucp-nfs-node1"
       end
       ucp_vancouver_node1.vm.provision "shell", inline: <<-SHELL
        sudo apt-get update
@@ -48,7 +48,7 @@ Vagrant.configure(2) do |config|
     end
 
     # DTR Node 1 for DDC setup
-    config.vm.define "dtr-vancouver-node1" do |dtr_vancouver_node1|
+    config.vm.define "dtr-nfs-node1" do |dtr_vancouver_node1|
       dtr_vancouver_node1.vm.box = "ubuntu/xenial64"
       dtr_vancouver_node1.vm.network "private_network", ip: "172.28.128.21"
       dtr_vancouver_node1.vm.hostname = "dtr.local"
@@ -56,7 +56,7 @@ Vagrant.configure(2) do |config|
          vb.customize ["modifyvm", :id, "--memory", "2048"]
          vb.customize ["modifyvm", :id, "--cpus", "2"]
          vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-         vb.name = "dtr-vancouver-node1"
+         vb.name = "dtr-nfs-node1"
       end
       dtr_vancouver_node1.vm.provision "shell", inline: <<-SHELL
         sudo apt-get update
@@ -99,15 +99,15 @@ Vagrant.configure(2) do |config|
     end
 
     # Application Worker Node 1
-    config.vm.define "worker-node1" do |worker_node1|
+    config.vm.define "dtr-nfs-node2" do |worker_node1|
       worker_node1.vm.box = "ubuntu/xenial64"
       worker_node1.vm.network "private_network", ip: "172.28.128.22"
-      worker_node1.vm.hostname = "worker-node1"
+      worker_node1.vm.hostname = "dtr-nfs-node2"
       config.vm.provider :virtualbox do |vb|
          vb.customize ["modifyvm", :id, "--memory", "2048"]
          vb.customize ["modifyvm", :id, "--cpus", "2"]
          vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-         vb.name = "worker-node1"
+         vb.name = "dtr-nfs-node2"
       end
       worker_node1.vm.provision "shell", inline: <<-SHELL
        sudo apt-get update
@@ -133,15 +133,15 @@ Vagrant.configure(2) do |config|
     end
 
     # Application Worker Node 2
-    config.vm.define "worker-node2" do |worker_node2|
+    config.vm.define "dtr-nfs-node3" do |worker_node2|
       worker_node2.vm.box = "ubuntu/xenial64"
       worker_node2.vm.network "private_network", ip: "172.28.128.23"
-      worker_node2.vm.hostname = "worker-node2"
+      worker_node2.vm.hostname = "dtr-nfs-node3"
       config.vm.provider :virtualbox do |vb|
          vb.customize ["modifyvm", :id, "--memory", "2048"]
          vb.customize ["modifyvm", :id, "--cpus", "2"]
          vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-         vb.name = "worker-node2"
+         vb.name = "dtr-nfs-node3"
       end
       worker_node2.vm.provision "shell", inline: <<-SHELL
        sudo apt-get update

@@ -3,10 +3,11 @@ Vagrant Virtualbox setup for CS Engine 1.13.1-cs1, UCP 2.1.0 and DTR 2.2.1 with 
 
 The following set of instructions helps Docker DataCenter across multiple vms with static ip addresses:
 
-* UCP - ucp.local on 172.28.128.20
-* Worker node - DTR replica, `dtr-nfs-node1` on 172.28.128.21
-* Worker node - DTR replica `dtr-nfs-node2` on 172.28.128.22
-* Worker node - DTR replica, `dtr-nfs-node3` on 172.28.128.23
+* Manager node - UCP controller `ucp-nfs-node1` on 172.28.128.21
+* Worker node - DTR replica, `dtr-nfs-node1` on 172.28.128.22
+* Worker node - DTR replica `dtr-nfs-node2` on 172.28.128.23
+* Worker node - DTR replica, `dtr-nfs-node3` on 172.28.128.24
+* NFS Server - `nfs-server-node` on 172.28.128.20
 
 ## Download vagrant from Vagrant website
 
@@ -31,20 +32,20 @@ vagrant plugin install vagrant-hostsupdater
 vagrant plugin install vagrant-multiprovider-snap
 ```
 
-## Bring up/Resume UCP, DTR, and Jenkins nodes
+## Bring up/Resume UCP, DTR, and NFS nodes
 
 ```
-vagrant up ucp-vancouver-node1 dtr-vancouver-node1 worker-node1 worker-node2
+vagrant up ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 nfs-server-node
 ```
 
-## Stop UCP, DTR, and Jenkins nodes
+## Stop UCP, DTR, and NFS nodes
 
 ```
-vagrant halt ucp-vancouver-node1 dtr-vancouver-node1 worker-node1 worker-node2
+vagrant halt ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 nfs-server-node
 ```
 
-## Destroy UCP, DTR, and Jenkins nodes
+## Destroy UCP, DTR, and NFS nodes
 
 ```
-vagrant destroy ucp-vancouver-node1 dtr-vancouver-node1 worker-node1 worker-node2
+vagrant destroy ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 nfs-server-node
 ```

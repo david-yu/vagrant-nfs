@@ -25,12 +25,12 @@ Vagrant.configure(2) do |config|
       end
       ucp_vancouver_node1.vm.provision "shell", inline: <<-SHELL
        sudo apt-get update
-       sudo apt-get install -y apt-transport-https ca-certificates ntpdate
+       sudo apt-get install -y apt-transport-https ca-certificates ntpdate nfs-common
        sudo ntpdate -s time.nist.gov
        sudo curl -fsSL https://packages.docker.com/1.13/install.sh | sh
        sudo usermod -aG docker ubuntu
-       ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/ucp-vancouver-node1-ipaddr
-       export UCP_IPADDR=$(cat /vagrant/ucp-vancouver-node1-ipaddr)
+       ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/ucp-nfs-node1
+       export UCP_IPADDR=$(cat /vagrant/ucp-nfs-node1)
        export UCP_PASSWORD=$(cat /vagrant/ucp_password)
        export HUB_USERNAME=$(cat /vagrant/hub_username)
        export HUB_PASSWORD=$(cat /vagrant/hub_password)
@@ -60,7 +60,7 @@ Vagrant.configure(2) do |config|
       end
       dtr_vancouver_node1.vm.provision "shell", inline: <<-SHELL
         sudo apt-get update
-        sudo apt-get install -y apt-transport-https ca-certificates ntpdate
+        sudo apt-get install -y apt-transport-https ca-certificates ntpdate nfs-common
         sudo ntpdate -s time.nist.gov
         sudo curl -fsSL https://packages.docker.com/1.13/install.sh | sh
         sudo usermod -aG docker ubuntu
@@ -69,13 +69,13 @@ Vagrant.configure(2) do |config|
         export HUB_PASSWORD=$(cat /vagrant/hub_password)
         docker login -u ${HUB_USERNAME} -p ${HUB_PASSWORD}
         # Join UCP Swarm
-        ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/dtr-vancouver-node1-ipaddr
+        ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/dtr-nfs-node1
         cat /dev/urandom | tr -dc 'a-f0-9' | fold -w 12 | head -n 1 > /vagrant/dtr-replica-id
         export UCP_PASSWORD=$(cat /vagrant/ucp_password)
-        export UCP_IPADDR=$(cat /vagrant/ucp-vancouver-node1-ipaddr)
+        export UCP_IPADDR=$(cat /vagrant/ucp-nfs-node1)
         export UCP_URL=https://ucp.local
         export DTR_URL=https://dtr.local
-        export DTR_IPADDR=$(cat /vagrant/dtr-vancouver-node1-ipaddr)
+        export DTR_IPADDR=$(cat /vagrant/dtr-nfs-node1)
         export SWARM_JOIN_TOKEN_WORKER=$(cat /vagrant/swarm-join-token-worker)
         export DTR_REPLICA_ID=$(cat /vagrant/dtr-replica-id)
         sudo sh -c "echo '${UCP_IPADDR} ucp.local' >> /etc/hosts"
@@ -111,18 +111,18 @@ Vagrant.configure(2) do |config|
       end
       worker_node1.vm.provision "shell", inline: <<-SHELL
        sudo apt-get update
-       sudo apt-get install -y apt-transport-https ca-certificates ntpdate
+       sudo apt-get install -y apt-transport-https ca-certificates ntpdate nfs-common
        sudo ntpdate -s time.nist.gov
        sudo curl -fsSL https://packages.docker.com/1.13/install.sh | sh
        sudo usermod -aG docker ubuntu
-       ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/worker-node1-ipaddr
+       ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/dtr-nfs-node2
        export HUB_USERNAME=$(cat /vagrant/hub_username)
        export HUB_PASSWORD=$(cat /vagrant/hub_password)
        docker login -u ${HUB_USERNAME} -p ${HUB_PASSWORD}
        docker pull docker/ucp:2.1.0
        # Join Swarm as worker
-       export UCP_IPADDR=$(cat /vagrant/ucp-vancouver-node1-ipaddr)
-       export DTR_IPADDR=$(cat /vagrant/dtr-vancouver-node1-ipaddr)
+       export UCP_IPADDR=$(cat /vagrant/ucp-nfs-node1)
+       export DTR_IPADDR=$(cat /vagrant/dtr-nfs-node2)
        export SWARM_JOIN_TOKEN_WORKER=$(cat /vagrant/swarm-join-token-worker)
        docker swarm join --token ${SWARM_JOIN_TOKEN_WORKER} ${UCP_IPADDR}:2377
        # Trust self-signed DTR CA
@@ -145,18 +145,18 @@ Vagrant.configure(2) do |config|
       end
       worker_node2.vm.provision "shell", inline: <<-SHELL
        sudo apt-get update
-       sudo apt-get install -y apt-transport-https ca-certificates ntpdate
+       sudo apt-get install -y apt-transport-https ca-certificates ntpdate nfs-common
        sudo ntpdate -s time.nist.gov
        sudo curl -fsSL https://packages.docker.com/1.13/install.sh | sh
        sudo usermod -aG docker ubuntu
-       ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/worker-node1-ipaddr
+       ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/dtr-nfs-node3
        export HUB_USERNAME=$(cat /vagrant/hub_username)
        export HUB_PASSWORD=$(cat /vagrant/hub_password)
        docker login -u ${HUB_USERNAME} -p ${HUB_PASSWORD}
        docker pull docker/ucp:2.1.0
        # Join Swarm as worker
-       export UCP_IPADDR=$(cat /vagrant/ucp-vancouver-node1-ipaddr)
-       export DTR_IPADDR=$(cat /vagrant/dtr-vancouver-node1-ipaddr)
+       export UCP_IPADDR=$(cat /vagrant/ucp-nfs-node1)
+       export DTR_IPADDR=$(cat /vagrant/dtr-nfs-node3)
        export SWARM_JOIN_TOKEN_WORKER=$(cat /vagrant/swarm-join-token-worker)
        export WORKER_NODE_NAME=$(hostname)
        docker swarm join --token ${SWARM_JOIN_TOKEN_WORKER} ${UCP_IPADDR}:2377
@@ -189,16 +189,19 @@ Vagrant.configure(2) do |config|
          sudo apt-get update
          sudo apt-get install -y apt-transport-https ca-certificates ntpdate nfs-kernel-server
          sudo ntpdate -s time.nist.gov
-         ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/ucp-vancouver-node1-ipaddr
-         export UCP_IPADDR=$(cat /vagrant/ucp-vancouver-node1-ipaddr)
+         ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/nfs-server-node
+         export UCP_IPADDR=$(cat /vagrant/ucp-nfs-node1)
          export UCP_PASSWORD=$(cat /vagrant/ucp_password)
          export HUB_USERNAME=$(cat /vagrant/hub_username)
          export HUB_PASSWORD=$(cat /vagrant/hub_password)
+         export DTR_NODE1_IPADDR=$(cat /vagrant/dtr-nfs-node1)
+         export DTR_NODE2_IPADDR=$(cat /vagrant/dtr-nfs-node2)
+         export DTR_NODE3_IPADDR=$(cat /vagrant/dtr-nfs-node3)
          sudo sh -c "echo '${UCP_IPADDR} ucp.local' >> /etc/hosts"
          sudo sh -c "echo '${DTR_IPADDR} dtr.local' >> /etc/hosts"
          sudo mkdir /var/nfs/dtr -p
          sudo chown nobody:nogroup /var/nfs/dtr
-         sudo sh -c "echo '/var/nfs/jenkins    10.10.4.110(rw,sync,no_subtree_check)' >> /etc/exports"
+         sudo sh -c "echo '/var/nfs/dtr    ${DTR_NODE1_IPADDR}(rw,sync,no_subtree_check)  ${DTR_NODE2_IPADDR}(rw,sync,no_subtree_check) ${DTR_NODE3_IPADDR}(rw,sync,no_subtree_check)' >> /etc/exports"
          sudo service nfs-kernel-server restart
        SHELL
       end

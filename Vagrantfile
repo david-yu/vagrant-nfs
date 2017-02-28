@@ -127,7 +127,7 @@ Vagrant.configure(2) do |config|
        export SWARM_JOIN_TOKEN_WORKER=$(cat /vagrant/swarm-join-token-worker)
        docker swarm join --token ${SWARM_JOIN_TOKEN_WORKER} ${UCP_IPADDR}:2377
        # Join DTR as a replica
-       docker run -it --rm docker/dtr join --ucp-url https://${UCP_IPADDR} --ucp-node engine06 --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)"
+       docker run -it --rm docker/dtr:2.2.2 join --ucp-url https://${UCP_IPADDR} --ucp-node engine06 --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)"
        # Trust self-signed DTR CA
        openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
        sudo update-ca-certificates
@@ -163,17 +163,12 @@ Vagrant.configure(2) do |config|
        export SWARM_JOIN_TOKEN_WORKER=$(cat /vagrant/swarm-join-token-worker)
        export WORKER_NODE_NAME=$(hostname)
        docker swarm join --token ${SWARM_JOIN_TOKEN_WORKER} ${UCP_IPADDR}:2377
+       # Join DTR as a replica
+       docker run -it --rm docker/dtr:2.2.2 join --ucp-url https://${UCP_IPADDR} --ucp-node engine06 --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)"
        # Trust self-signed DTR CA
        openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
        sudo update-ca-certificates
        sudo service docker restart
-       # Install Notary
-       curl -L https://github.com/docker/notary/releases/download/v0.4.3/notary-Linux-amd64 > /home/ubuntu/notary
-       chmod +x /home/ubuntu/notary
-       # Create jenkins folder to store Jenkins container config
-       sudo mkdir /home/ubuntu/jenkins
-       # Create notary foldoer to store trust config
-       sudo mkdir -p /home/ubuntu/notary-config/.docker/trust
      SHELL
     end
 

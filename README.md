@@ -35,17 +35,17 @@ vagrant plugin install vagrant-multiprovider-snap
 ## Bring up/Resume UCP, DTR, and NFS nodes
 
 ```
-vagrant up ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 nfs-server-node
+vagrant up ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3 nfs-server-node
 ```
 
 ## Stop UCP, DTR, and NFS nodes
 
 ```
-vagrant halt ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 nfs-server-node
+vagrant halt ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3 nfs-server-node
 ```
 
 ## Destroy UCP, DTR, and NFS nodes
 
 ```
-vagrant destroy ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 nfs-server-node
+vagrant destroy ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3 nfs-server-node
 ```

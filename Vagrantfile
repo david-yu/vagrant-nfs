@@ -131,6 +131,7 @@ Vagrant.configure(2) do |config|
        export DTR_REPLICA_ID=$(cat /vagrant/dtr-node2-replica-id)
        docker swarm join --token ${SWARM_JOIN_TOKEN_WORKER} ${UCP_IPADDR}:2377
        # Join DTR as a replica
+       curl -k https://${UCP_IPADDR}/ca > ucp-ca.pem
        docker run -it --rm docker/dtr:2.2.2 join --replica-id ${DTR_REPLICA_ID} --ucp-url https://${UCP_IPADDR} --ucp-node ${WORKER_NODE_NAME} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)"
        # Run backup of DTR
        docker run --rm docker/dtr:2.2.2 backup --ucp-url https://${UCP_IPADDR} --existing-replica-id ${DTR_REPLICA_ID} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)" > /tmp/backup.tar
@@ -172,6 +173,7 @@ Vagrant.configure(2) do |config|
        export DTR_REPLICA_ID=$(cat /vagrant/dtr-node3-replica-id)
        docker swarm join --token ${SWARM_JOIN_TOKEN_WORKER} ${UCP_IPADDR}:2377
        # Join DTR as a replica
+       curl -k https://${UCP_IPADDR}/ca > ucp-ca.pem
        docker run -it --rm docker/dtr:2.2.2 join --replica-id ${DTR_REPLICA_ID} --ucp-url https://${UCP_IPADDR} --ucp-node ${WORKER_NODE_NAME} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)"
        # Trust self-signed DTR CA
        openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt

@@ -34,8 +34,6 @@ Vagrant.configure(2) do |config|
        export UCP_PASSWORD=$(cat /vagrant/ucp_password)
        export HUB_USERNAME=$(cat /vagrant/hub_username)
        export HUB_PASSWORD=$(cat /vagrant/hub_password)
-       sudo sh -c "echo '${UCP_IPADDR} ucp.local' >> /etc/hosts"
-       sudo sh -c "echo '172.28.128.21 dtr.local' >> /etc/hosts"
        docker login -u ${HUB_USERNAME} -p ${HUB_PASSWORD}
        docker pull docker/ucp:2.1.0
        docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock -v /vagrant/docker_subscription.lic:/docker_subscription.lic docker/ucp:2.1.0 install --host-address ${UCP_IPADDR} --admin-password ${UCP_PASSWORD} --san ucp.local
@@ -80,8 +78,6 @@ Vagrant.configure(2) do |config|
         export WORKER_NODE_NAME=$(hostname)
         export DTR_REPLICA_ID=$(cat /vagrant/dtr-node1-replica-id)
         export NFS_IPADDR=172.28.128.20
-        sudo sh -c "echo '${UCP_IPADDR} ucp.local' >> /etc/hosts"
-        sudo sh -c "echo '${DTR_IPADDR} dtr.local' >> /etc/hosts"
         docker pull docker/ucp:2.1.0
         docker swarm join --token ${SWARM_JOIN_TOKEN_WORKER} ${UCP_IPADDR}:2377
         # Wait for Join to complete
@@ -206,8 +202,6 @@ Vagrant.configure(2) do |config|
          export DTR_NODE1_IPADDR=172.28.128.22
          export DTR_NODE2_IPADDR=172.28.128.23
          export DTR_NODE3_IPADDR=172.28.128.24
-         sudo sh -c "echo '${UCP_IPADDR} ucp.local' >> /etc/hosts"
-         sudo sh -c "echo '${DTR_IPADDR} dtr.local' >> /etc/hosts"
          sudo mkdir /var/nfs/dtr -p
          sudo chown nobody:nogroup /var/nfs/dtr
          sudo sh -c "echo '/var/nfs/dtr    ${DTR_NODE1_IPADDR}(rw,sync,no_subtree_check)  ${DTR_NODE2_IPADDR}(rw,sync,no_subtree_check) ${DTR_NODE3_IPADDR}(rw,sync,no_subtree_check)' >> /etc/exports"

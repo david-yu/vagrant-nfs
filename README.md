@@ -33,7 +33,7 @@ vagrant plugin install vagrant-multiprovider-snap
 ```
 
 ## Bring up/Resume NFS, UCP and DTR nodes
-Make sure to bring up `nfs-server-node` first prior to bringing up the DTR nodes.
+Make sure to bring up `nfs-server-node` prior to bringing up the DTR nodes, since DTR relies on NFS for registry image storage.
 ```
 vagrant up nfs-server-node ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3
 ```

@@ -183,7 +183,7 @@ Vagrant.configure(2) do |config|
       config.vm.define "nfs-server-node" do |nfs_server_node1|
         nfs_server_node1.vm.box = "ubuntu/xenial64"
         nfs_server_node1.vm.network "private_network", ip: "172.28.128.20"
-        nfs_server_node1.vm.hostname = "ucp.local"
+        nfs_server_node1.vm.hostname = "nfs-server-node"
         config.vm.provider :virtualbox do |vb|
            vb.customize ["modifyvm", :id, "--memory", "2048"]
            vb.customize ["modifyvm", :id, "--cpus", "2"]

@@ -219,21 +219,21 @@ Vagrant.configure(2) do |config|
     end
 
     # HAProxy node for DTR
-    config.vm.define "haproxy-node" do |nfs_server_node1|
-      nfs_server_node1.vm.box = "ubuntu/xenial64"
-      nfs_server_node1.vm.network "private_network", ip: "172.28.128.25"
-      nfs_server_node1.vm.hostname = "haproxy-node"
+    config.vm.define "haproxy-node" do |haproxy_node|
+      haproxy_node.vm.box = "ubuntu/xenial64"
+      haproxy_node.vm.network "private_network", ip: "172.28.128.25"
+      haproxy_node.vm.hostname = "haproxy-node"
       config.vm.provider :virtualbox do |vb|
          vb.customize ["modifyvm", :id, "--memory", "1024"]
          vb.customize ["modifyvm", :id, "--cpus", "1"]
          vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
          vb.name = "haproxy-node"
       end
-      nfs_server_node1.vm.provision "shell", inline: <<-SHELL
+      haproxy_node.vm.provision "shell", inline: <<-SHELL
        sudo apt-get update
-       sudo apt-get install -y apt-transport-https ca-certificates ntpdate
+       sudo apt-get install -y apt-transport-https ca-certificates ntpdate haproxy
        sudo ntpdate -s time.nist.gov
-       ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/nfs-server-node
+       ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/haproxy-node
        export UCP_IPADDR=$(cat /vagrant/ucp-nfs-node1)
        export UCP_PASSWORD=$(cat /vagrant/ucp_password)
        export HUB_USERNAME=$(cat /vagrant/hub_username)
@@ -241,10 +241,6 @@ Vagrant.configure(2) do |config|
        export DTR_NODE1_IPADDR=172.28.128.22
        export DTR_NODE2_IPADDR=172.28.128.23
        export DTR_NODE3_IPADDR=172.28.128.24
-       sudo mkdir /var/nfs/dtr -p
-       sudo chown nobody:nogroup /var/nfs/dtr
-       sudo sh -c "echo '/var/nfs/dtr    ${DTR_NODE1_IPADDR}(rw,sync,no_subtree_check)  ${DTR_NODE2_IPADDR}(rw,sync,no_subtree_check) ${DTR_NODE3_IPADDR}(rw,sync,no_subtree_check)' >> /etc/exports"
-       sudo service nfs-kernel-server restart
       SHELL
     end
 

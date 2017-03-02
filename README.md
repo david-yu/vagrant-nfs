@@ -72,8 +72,6 @@ latest: digest: sha256:dc458aa3ba58a59532663abdc199c84c1d3bbd7379bf91e6b4b9ed61b
 Check that repository exists
 
 ```
-
-```
 $ vagrant ssh nfs-server-node
 $ ls -alF /var/nfs/dtr/docker/registry/v2/repositories/engineering/redis/
 total 20

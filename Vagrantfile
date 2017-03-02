@@ -179,6 +179,8 @@ Vagrant.configure(2) do |config|
        # Join DTR as a replica
        curl -k https://${UCP_IPADDR}/ca > ucp-ca.pem
        docker run -it --rm docker/dtr:2.2.2 join --replica-id ${DTR_REPLICA_ID} --existing-replica-id ${EXISTING_DTR_REPLICA_ID} --ucp-url https://${UCP_IPADDR} --ucp-node ${WORKER_NODE_NAME} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)"
+       # Run backup of DTR
+       docker run --rm docker/dtr:2.2.2 backup --ucp-url https://${UCP_IPADDR} --existing-replica-id ${DTR_REPLICA_ID} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)" > /tmp/backup.tar
        # Trust self-signed DTR CA
        openssl s_client -connect ${DTR_URL}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_URL}.crt
        sudo update-ca-certificates
@@ -187,33 +189,63 @@ Vagrant.configure(2) do |config|
     end
 
     # NFS node for DDC
-      config.vm.define "nfs-server-node" do |nfs_server_node1|
-        nfs_server_node1.vm.box = "ubuntu/xenial64"
-        nfs_server_node1.vm.network "private_network", ip: "172.28.128.20"
-        nfs_server_node1.vm.hostname = "nfs-server-node"
-        config.vm.provider :virtualbox do |vb|
-           vb.customize ["modifyvm", :id, "--memory", "2048"]
-           vb.customize ["modifyvm", :id, "--cpus", "2"]
-           vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-           vb.name = "nfs-server-node"
-        end
-        nfs_server_node1.vm.provision "shell", inline: <<-SHELL
-         sudo apt-get update
-         sudo apt-get install -y apt-transport-https ca-certificates ntpdate nfs-kernel-server
-         sudo ntpdate -s time.nist.gov
-         ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/nfs-server-node
-         export UCP_IPADDR=$(cat /vagrant/ucp-nfs-node1)
-         export UCP_PASSWORD=$(cat /vagrant/ucp_password)
-         export HUB_USERNAME=$(cat /vagrant/hub_username)
-         export HUB_PASSWORD=$(cat /vagrant/hub_password)
-         export DTR_NODE1_IPADDR=172.28.128.22
-         export DTR_NODE2_IPADDR=172.28.128.23
-         export DTR_NODE3_IPADDR=172.28.128.24
-         sudo mkdir /var/nfs/dtr -p
-         sudo chown nobody:nogroup /var/nfs/dtr
-         sudo sh -c "echo '/var/nfs/dtr    ${DTR_NODE1_IPADDR}(rw,sync,no_subtree_check)  ${DTR_NODE2_IPADDR}(rw,sync,no_subtree_check) ${DTR_NODE3_IPADDR}(rw,sync,no_subtree_check)' >> /etc/exports"
-         sudo service nfs-kernel-server restart
-       SHELL
+    config.vm.define "nfs-server-node" do |nfs_server_node1|
+      nfs_server_node1.vm.box = "ubuntu/xenial64"
+      nfs_server_node1.vm.network "private_network", ip: "172.28.128.20"
+      nfs_server_node1.vm.hostname = "nfs-server-node"
+      config.vm.provider :virtualbox do |vb|
+         vb.customize ["modifyvm", :id, "--memory", "2048"]
+         vb.customize ["modifyvm", :id, "--cpus", "2"]
+         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+         vb.name = "nfs-server-node"
       end
+      nfs_server_node1.vm.provision "shell", inline: <<-SHELL
+       sudo apt-get update
+       sudo apt-get install -y apt-transport-https ca-certificates ntpdate nfs-kernel-server
+       sudo ntpdate -s time.nist.gov
+       ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/nfs-server-node
+       export UCP_IPADDR=$(cat /vagrant/ucp-nfs-node1)
+       export UCP_PASSWORD=$(cat /vagrant/ucp_password)
+       export HUB_USERNAME=$(cat /vagrant/hub_username)
+       export HUB_PASSWORD=$(cat /vagrant/hub_password)
+       export DTR_NODE1_IPADDR=172.28.128.22
+       export DTR_NODE2_IPADDR=172.28.128.23
+       export DTR_NODE3_IPADDR=172.28.128.24
+       sudo mkdir /var/nfs/dtr -p
+       sudo chown nobody:nogroup /var/nfs/dtr
+       sudo sh -c "echo '/var/nfs/dtr    ${DTR_NODE1_IPADDR}(rw,sync,no_subtree_check)  ${DTR_NODE2_IPADDR}(rw,sync,no_subtree_check) ${DTR_NODE3_IPADDR}(rw,sync,no_subtree_check)' >> /etc/exports"
+       sudo service nfs-kernel-server restart
+      SHELL
+    end
+
+    # HAProxy node for DTR
+    config.vm.define "haproxy-node" do |nfs_server_node1|
+      nfs_server_node1.vm.box = "ubuntu/xenial64"
+      nfs_server_node1.vm.network "private_network", ip: "172.28.128.25"
+      nfs_server_node1.vm.hostname = "haproxy-node"
+      config.vm.provider :virtualbox do |vb|
+         vb.customize ["modifyvm", :id, "--memory", "1024"]
+         vb.customize ["modifyvm", :id, "--cpus", "1"]
+         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+         vb.name = "haproxy-node"
+      end
+      nfs_server_node1.vm.provision "shell", inline: <<-SHELL
+       sudo apt-get update
+       sudo apt-get install -y apt-transport-https ca-certificates ntpdate
+       sudo ntpdate -s time.nist.gov
+       ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/nfs-server-node
+       export UCP_IPADDR=$(cat /vagrant/ucp-nfs-node1)
+       export UCP_PASSWORD=$(cat /vagrant/ucp_password)
+       export HUB_USERNAME=$(cat /vagrant/hub_username)
+       export HUB_PASSWORD=$(cat /vagrant/hub_password)
+       export DTR_NODE1_IPADDR=172.28.128.22
+       export DTR_NODE2_IPADDR=172.28.128.23
+       export DTR_NODE3_IPADDR=172.28.128.24
+       sudo mkdir /var/nfs/dtr -p
+       sudo chown nobody:nogroup /var/nfs/dtr
+       sudo sh -c "echo '/var/nfs/dtr    ${DTR_NODE1_IPADDR}(rw,sync,no_subtree_check)  ${DTR_NODE2_IPADDR}(rw,sync,no_subtree_check) ${DTR_NODE3_IPADDR}(rw,sync,no_subtree_check)' >> /etc/exports"
+       sudo service nfs-kernel-server restart
+      SHELL
+    end
 
 end

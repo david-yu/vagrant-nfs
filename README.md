@@ -38,6 +38,52 @@ Make sure to bring up `nfs-server-node` prior to bringing up the DTR nodes, sinc
 vagrant up nfs-server-node ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3
 ```
 
+## Push sample image to DTR to test NFS
+
+Pull redis image, tag it, and then push to DTR
+```
+$ docker pull redis
+Using default tag: latest
+latest: Pulling from library/redis
+693502eb7dfb: Pull complete
+338a71333959: Pull complete
+83f12ff60ff1: Pull complete
+4b7726832aec: Pull complete
+19a7e34366a6: Pull complete
+622732cddc34: Pull complete
+3b281f2bcae3: Pull complete
+Digest: sha256:4c8fb09e8d634ab823b1c125e64f0e1ceaf216025aa38283ea1b42997f1e8059
+Status: Downloaded newer image for redis:latest
+$ docker tag redis 172.28.128.22/engineering/redis
+$ docker login 172.28.128.22 -u admin
+Login Succeeded
+$ docker push 172.28.128.22/engineering/redis
+The push refers to a repository [172.28.128.22/engineering/redis]
+450fce7b3b76: Pushed
+9444719e7966: Pushed
+61178e9e9bce: Pushed
+c235d5b4caa3: Pushed
+307248831aca: Pushed
+387483b2c715: Pushed
+a2ae92ffcd29: Pushed
+latest: digest: sha256:dc458aa3ba58a59532663abdc199c84c1d3bbd7379bf91e6b4b9ed61b34a0bb4 size: 1783
+```
+
+Check that repository exists
+
+```
+
+```
+$ vagrant ssh nfs-server-node
+$ ls -alF /var/nfs/dtr/docker/registry/v2/repositories/engineering/redis/
+total 20
+drwxr-xr-x 5 nobody nogroup 4096 Mar  2 21:54 ./
+drwxr-xr-x 3 nobody nogroup 4096 Mar  2 21:54 ../
+drwxr-xr-x 3 nobody nogroup 4096 Mar  2 21:54 _layers/
+drwxr-xr-x 4 nobody nogroup 4096 Mar  2 21:54 _manifests/
+drwxr-xr-x 2 nobody nogroup 4096 Mar  2 21:54 _uploads/
+```
+
 ## Stop UCP, DTR, and NFS nodes
 
 ```

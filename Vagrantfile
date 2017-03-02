@@ -42,6 +42,8 @@ Vagrant.configure(2) do |config|
        docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp:2.1.0 id | awk '{ print $1}' > /vagrant/ucp-vancouver-id
        export UCP_ID=$(cat /vagrant/ucp-vancouver-id)
        docker run --rm -i --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp:2.1.0 backup --id ${UCP_ID} --root-ca-only --passphrase "secret" > /vagrant/backup.tar
+       # Copy convenience scripts
+       sudo cp -r /vagrant/scripts /home/ubuntu/scripts
      SHELL
     end
 

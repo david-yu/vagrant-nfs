@@ -84,7 +84,7 @@ Vagrant.configure(2) do |config|
         sleep 30
         # Install DTR
         curl -k https://${UCP_IPADDR}/ca > ucp-ca.pem
-        docker run --rm docker/dtr:2.2.2 install --hub-username ${HUB_USERNAME} --hub-password ${HUB_PASSWORD} --ucp-url https://${UCP_IPADDR} --ucp-node ${WORKER_NODE_NAME} --replica-id ${DTR_REPLICA_ID} --dtr-external-url https://${DTR_IPADDR} --nfs-storage-url nfs://${NFS_IPADDR}:/var/nfs/ --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)"
+        docker run --rm docker/dtr:2.2.2 install --hub-username ${HUB_USERNAME} --hub-password ${HUB_PASSWORD} --ucp-url https://${UCP_IPADDR} --ucp-node ${WORKER_NODE_NAME} --replica-id ${DTR_REPLICA_ID} --dtr-external-url https://${DTR_IPADDR} --nfs-storage-url nfs://${NFS_IPADDR}/var/nfs/dtr --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)"
         # Run backup of DTR
         docker run --rm docker/dtr:2.2.2 backup --ucp-url https://${UCP_IPADDR} --existing-replica-id ${DTR_REPLICA_ID} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)" > /tmp/backup.tar
         # Trust self-signed DTR CA

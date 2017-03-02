@@ -16,7 +16,7 @@ Vagrant.configure(2) do |config|
     config.vm.define "ucp-nfs-node1" do |ucp_nfs_node1|
       ucp_nfs_node1.vm.box = "ubuntu/xenial64"
       ucp_nfs_node1.vm.network "private_network", ip: "172.28.128.21"
-      ucp_nfs_node1.vm.hostname = "ucp.local"
+      ucp_nfs_node1.vm.hostname = "ucp-nfs-node1"
       config.vm.provider :virtualbox do |vb|
          vb.customize ["modifyvm", :id, "--memory", "2048"]
          vb.customize ["modifyvm", :id, "--cpus", "2"]
@@ -49,7 +49,7 @@ Vagrant.configure(2) do |config|
     config.vm.define "dtr-nfs-node1" do |dtr_nfs_node1|
       dtr_nfs_node1.vm.box = "ubuntu/xenial64"
       dtr_nfs_node1.vm.network "private_network", ip: "172.28.128.22"
-      dtr_nfs_node1.vm.hostname = "dtr.local"
+      dtr_nfs_node1.vm.hostname = "dtr-nfs-node1"
       config.vm.provider :virtualbox do |vb|
          vb.customize ["modifyvm", :id, "--memory", "2048"]
          vb.customize ["modifyvm", :id, "--cpus", "2"]

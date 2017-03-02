@@ -170,6 +170,7 @@ Vagrant.configure(2) do |config|
        export UCP_IPADDR=$(cat /vagrant/ucp-nfs-node1)
        export DTR_IPADDR=$(cat /vagrant/dtr-nfs-node3)
        export DTR_URL=$(cat /vagrant/dtr-nfs-node1)
+       export UCP_PASSWORD=$(cat /vagrant/ucp_password)
        export SWARM_JOIN_TOKEN_WORKER=$(cat /vagrant/swarm-join-token-worker)
        export WORKER_NODE_NAME=$(hostname)
        export EXISTING_DTR_REPLICA_ID=$(cat /vagrant/dtr-node1-replica-id)

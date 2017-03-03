@@ -7,7 +7,8 @@ The following set of instructions helps Docker DataCenter across multiple vms wi
 * Worker node - DTR replica, `dtr-nfs-node1` on 172.28.128.22
 * Worker node - DTR replica `dtr-nfs-node2` on 172.28.128.23
 * Worker node - DTR replica, `dtr-nfs-node3` on 172.28.128.24
-* NFS Server - `nfs-server-node` on 172.28.128.20
+* NFS Server node - `nfs-server-node` on 172.28.128.20
+* HAProxy node - `haproxy-node` on 172.278.128.25
 
 ## Download vagrant from Vagrant website
 
@@ -35,7 +36,7 @@ vagrant plugin install vagrant-multiprovider-snap
 ## Bring up/Resume NFS, UCP and DTR nodes
 Make sure to bring up `nfs-server-node` prior to bringing up the DTR nodes, since DTR relies on NFS for registry image storage.
 ```
-vagrant up nfs-server-node ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3
+vagrant up nfs-server-node haproxy-node ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3
 ```
 
 ## Push sample image to DTR to test NFS
@@ -85,11 +86,11 @@ drwxr-xr-x 2 nobody nogroup 4096 Mar  2 21:54 _uploads/
 ## Stop UCP, DTR, and NFS nodes
 
 ```
-vagrant halt ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3 nfs-server-node
+vagrant halt ucp-nfs-node1 haproxy-node dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3 nfs-server-node
 ```
 
 ## Destroy UCP, DTR, and NFS nodes
 
 ```
-vagrant destroy nfs-server-node ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3
+vagrant destroy dtr-nfs-node3 dtr-nfs-node2 dtr-nfs-node1 ucp-nfs-node1 haproxy-node nfs-server-node
 ```

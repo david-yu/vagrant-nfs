@@ -235,12 +235,11 @@ Vagrant.configure(2) do |config|
        sudo ntpdate -s time.nist.gov
        ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/haproxy-node
        export UCP_IPADDR=$(cat /vagrant/ucp-nfs-node1)
-       export UCP_PASSWORD=$(cat /vagrant/ucp_password)
-       export HUB_USERNAME=$(cat /vagrant/hub_username)
-       export HUB_PASSWORD=$(cat /vagrant/hub_password)
        export DTR_NODE1_IPADDR=172.28.128.22
        export DTR_NODE2_IPADDR=172.28.128.23
        export DTR_NODE3_IPADDR=172.28.128.24
+       sudo cp /vagrant/files/dtr.cfg /usr/local/etc/haproxy/haproxy.cfg
+       sudo service haproxy restart
       SHELL
     end
 

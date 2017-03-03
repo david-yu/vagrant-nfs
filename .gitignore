@@ -25,3 +25,4 @@ dtr-nfs-node1
 dtr-nfs-node2
 dtr-nfs-node3
 nfs-server-node
+haproxy-node

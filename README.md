@@ -86,7 +86,7 @@ drwxr-xr-x 2 nobody nogroup 4096 Mar  2 21:54 _uploads/
 ## Stop UCP, DTR, and NFS nodes
 
 ```
-vagrant halt ucp-nfs-node1 haproxy-node dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3 nfs-server-node
+vagrant halt dtr-nfs-node3 dtr-nfs-node2 dtr-nfs-node1 ucp-nfs-node1 haproxy-node nfs-server-node
 ```
 
 ## Destroy UCP, DTR, and NFS nodes

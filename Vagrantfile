@@ -238,7 +238,7 @@ Vagrant.configure(2) do |config|
        export DTR_NODE1_IPADDR=172.28.128.22
        export DTR_NODE2_IPADDR=172.28.128.23
        export DTR_NODE3_IPADDR=172.28.128.24
-       sudo cp /vagrant/files/dtr.cfg /usr/local/etc/haproxy/haproxy.cfg
+       sudo cp /vagrant/files/dtr.cfg /etc/haproxy/haproxy.cfg
        sudo service haproxy restart
       SHELL
     end

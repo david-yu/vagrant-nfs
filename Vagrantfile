@@ -238,9 +238,10 @@ Vagrant.configure(2) do |config|
        export DTR_NODE1_IPADDR=172.28.128.22
        export DTR_NODE2_IPADDR=172.28.128.23
        export DTR_NODE3_IPADDR=172.28.128.24
-       sudo cp /vagrant/files/dtr.cfg /etc/haproxy/haproxy.cfg
        sudo sed -i '/module(load="imudp")/s/^#//g' /etc/rsyslog.conf
        sudo sed -i '/input(type="imudp" port="514")/s/^#//g' /etc/rsyslog.conf
+       sudo service rsyslog restart
+       sudo cp /vagrant/files/dtr.cfg /etc/haproxy/haproxy.cfg
        sudo service haproxy restart
       SHELL
     end

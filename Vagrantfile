@@ -194,8 +194,8 @@ Vagrant.configure(2) do |config|
       nfs_server_node1.vm.network "private_network", ip: "172.28.128.20"
       nfs_server_node1.vm.hostname = "nfs-server-node"
       config.vm.provider :virtualbox do |vb|
-         vb.customize ["modifyvm", :id, "--memory", "2048"]
-         vb.customize ["modifyvm", :id, "--cpus", "2"]
+         vb.customize ["modifyvm", :id, "--memory", "1024"]
+         vb.customize ["modifyvm", :id, "--cpus", "1"]
          vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
          vb.name = "nfs-server-node"
       end
@@ -239,6 +239,8 @@ Vagrant.configure(2) do |config|
        export DTR_NODE2_IPADDR=172.28.128.23
        export DTR_NODE3_IPADDR=172.28.128.24
        sudo cp /vagrant/files/dtr.cfg /etc/haproxy/haproxy.cfg
+       sudo sed -i '/module(load="imudp")/s/^#//g' /etc/rsyslog.conf
+       sudo sed -i '/input(type="imudp" port="514")/s/^#//g' /etc/rsyslog.conf
        sudo service haproxy restart
       SHELL
     end

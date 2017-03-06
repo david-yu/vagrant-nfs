@@ -89,6 +89,16 @@ drwxr-xr-x 2 nobody nogroup 4096 Mar  2 21:54 _uploads/
 vagrant halt dtr-nfs-node3 dtr-nfs-node2 dtr-nfs-node1 ucp-nfs-node1 haproxy-node nfs-server-node
 ```
 
+## Restart
+
+```
+vagrant up nfs-server-node
+vagrant ssh nfs-server-node
+sudo service nfs-kernel-server restart
+exit
+vagrant up haproxy-node ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3
+```
+
 ## Destroy UCP, DTR, and NFS nodes
 
 ```

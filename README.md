@@ -10,6 +10,7 @@ The following set of instructions helps Docker DataCenter across multiple vms wi
 * Worker node - DTR replica `dtr-nfs-node2` on 172.28.128.24
 * Worker node - DTR replica, `dtr-nfs-node3` on 172.28.128.25
 
+UCP traffic is proxied from `https://ucp.local` to 172.28.128.22. DTR traffic is load balanced from `https://dtr.local` to 172.28.128.23, 172.28.128.24, and 172.28.128.25. 
 
 ## Download vagrant from Vagrant website
 
@@ -32,6 +33,16 @@ vagrant init ubuntu/xenial64
 ```
 vagrant plugin install vagrant-hostsupdater
 vagrant plugin install vagrant-multiprovider-snap
+```
+
+## Point ucp.local and dtr.local to HAProxy ip addresses
+```
+# edit /etc/hosts on macOS
+sudo vi /private/etc/hosts
+# add this line
+172.28.128.21   dtr.local ucp.local
+# save hosts config
+sudo killall -HUP mDNSResponder
 ```
 
 ## Bring up/Resume NFS, UCP and DTR nodes

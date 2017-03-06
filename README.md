@@ -83,20 +83,16 @@ drwxr-xr-x 4 nobody nogroup 4096 Mar  2 21:54 _manifests/
 drwxr-xr-x 2 nobody nogroup 4096 Mar  2 21:54 _uploads/
 ```
 
-## Stop UCP, DTR, and NFS nodes
+## Pause UCP, DTR, and NFS nodes
 
 ```
-vagrant halt dtr-nfs-node3 dtr-nfs-node2 dtr-nfs-node1 ucp-nfs-node1 haproxy-node nfs-server-node
+vagrant suspend dtr-nfs-node3 dtr-nfs-node2 dtr-nfs-node1 ucp-nfs-node1 haproxy-node nfs-server-node
 ```
 
-## Restart
+## Resume UCP, DTR, and NFS nodes
 
 ```
-vagrant up nfs-server-node
-vagrant ssh nfs-server-node
-sudo service nfs-kernel-server restart
-exit
-vagrant up haproxy-node ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3
+vagrant resume nfs-server-node haproxy-node ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3
 ```
 
 ## Destroy UCP, DTR, and NFS nodes

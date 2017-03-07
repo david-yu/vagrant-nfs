@@ -52,8 +52,12 @@ Vagrant.configure(2) do |config|
     end
     haproxy_node.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
-     sudo apt-get install -y apt-transport-https ca-certificates ntpdate haproxy
+     sudo apt-get install -y apt-transport-https ca-certificates ntpdate
      sudo ntpdate -s time.nist.gov
+     sudo apt-get install -y software-properties-common
+     sudo add-apt-repository ppa:vbernat/haproxy-1.7
+     sudo apt-get update
+     sudo apt-get install -y haproxy
      ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/haproxy-node
      export UCP_IPADDR=$(cat /vagrant/ucp-nfs-node1)
      export DTR_NODE1_IPADDR=172.28.128.23

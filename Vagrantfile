@@ -93,6 +93,8 @@ Vagrant.configure(2) do |config|
        export UCP_PASSWORD=$(cat /vagrant/ucp_password)
        export HUB_USERNAME=$(cat /vagrant/hub_username)
        export HUB_PASSWORD=$(cat /vagrant/hub_password)
+       export HAPROXY_IPADDR=$(cat /vagrant/haproxy-node)
+       sudo sh -c "echo '${HAPROXY_IPADDR} ucp.local dtr.local' >> /etc/hosts"
        docker login -u ${HUB_USERNAME} -p ${HUB_PASSWORD}
        docker pull docker/ucp:2.1.0
        docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp:2.1.0 install --host-address ${UCP_IPADDR} --admin-password ${UCP_PASSWORD} --san ucp.local --license $(cat /vagrant/docker_subscription.lic)
@@ -139,15 +141,17 @@ Vagrant.configure(2) do |config|
         export WORKER_NODE_NAME=$(hostname)
         export DTR_REPLICA_ID=$(cat /vagrant/dtr-node1-replica-id)
         export NFS_IPADDR=$(cat /vagrant/nfs-server-node)
+        export HAPROXY_IPADDR=$(cat /vagrant/haproxy-node)
+        sudo sh -c "echo '${HAPROXY_IPADDR} ucp.local dtr.local' >> /etc/hosts"
         docker pull docker/ucp:2.1.0
         docker swarm join --token ${SWARM_JOIN_TOKEN_WORKER} ${UCP_IPADDR}:2377
         # Wait for Join to complete
         sleep 30
         # Install DTR
         curl -k https://${UCP_IPADDR}/ca > ucp-ca.pem
-        docker run --rm docker/dtr:2.2.2 install --hub-username ${HUB_USERNAME} --hub-password ${HUB_PASSWORD} --ucp-url https://${UCP_IPADDR} --ucp-node ${WORKER_NODE_NAME} --replica-id ${DTR_REPLICA_ID} --dtr-external-url ${DTR_URL} --nfs-storage-url nfs://${NFS_IPADDR}/var/nfs/dtr --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)"
+        docker run --rm docker/dtr:2.2.2 install --hub-username ${HUB_USERNAME} --hub-password ${HUB_PASSWORD} --ucp-url https://ucp.local --ucp-node ${WORKER_NODE_NAME} --replica-id ${DTR_REPLICA_ID} --dtr-external-url ${DTR_URL} --nfs-storage-url nfs://${NFS_IPADDR}/var/nfs/dtr --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)"
         # Run backup of DTR
-        docker run --rm docker/dtr:2.2.2 backup --ucp-url https://${UCP_IPADDR} --existing-replica-id ${DTR_REPLICA_ID} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)" > /tmp/backup.tar
+        docker run --rm docker/dtr:2.2.2 backup --ucp-url https://ucp.local --existing-replica-id ${DTR_REPLICA_ID} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)" > /tmp/backup.tar
         # Trust self-signed DTR CA
         openssl s_client -connect ${DTR_IPADDR}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_IPADDR}.crt
         sudo update-ca-certificates
@@ -189,12 +193,14 @@ Vagrant.configure(2) do |config|
        export WORKER_NODE_NAME=$(hostname)
        export EXISTING_DTR_REPLICA_ID=$(cat /vagrant/dtr-node1-replica-id)
        export DTR_REPLICA_ID=$(cat /vagrant/dtr-node2-replica-id)
+       export HAPROXY_IPADDR=$(cat /vagrant/haproxy-node)
+       sudo sh -c "echo '${HAPROXY_IPADDR} ucp.local dtr.local' >> /etc/hosts"
        docker swarm join --token ${SWARM_JOIN_TOKEN_WORKER} ${UCP_IPADDR}:2377
        # Join DTR as a replica
        curl -k https://${UCP_IPADDR}/ca > ucp-ca.pem
-       docker run -it --rm docker/dtr:2.2.2 join --replica-id ${DTR_REPLICA_ID} --existing-replica-id ${EXISTING_DTR_REPLICA_ID} --ucp-url https://${UCP_IPADDR} --ucp-node ${WORKER_NODE_NAME} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)"
+       docker run -it --rm docker/dtr:2.2.2 join --replica-id ${DTR_REPLICA_ID} --existing-replica-id ${EXISTING_DTR_REPLICA_ID} --ucp-url https://ucp.local --ucp-node ${WORKER_NODE_NAME} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)"
        # Run backup of DTR
-       docker run --rm docker/dtr:2.2.2 backup --ucp-url https://${UCP_IPADDR} --existing-replica-id ${DTR_REPLICA_ID} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)" > /tmp/backup.tar
+       docker run --rm docker/dtr:2.2.2 backup --ucp-url https://ucp.local --existing-replica-id ${DTR_REPLICA_ID} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)" > /tmp/backup.tar
        # Trust self-signed DTR CA
        openssl s_client -connect ${DTR_URL}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_URL}.crt
        sudo update-ca-certificates
@@ -234,12 +240,14 @@ Vagrant.configure(2) do |config|
        export WORKER_NODE_NAME=$(hostname)
        export EXISTING_DTR_REPLICA_ID=$(cat /vagrant/dtr-node1-replica-id)
        export DTR_REPLICA_ID=$(cat /vagrant/dtr-node3-replica-id)
+       export HAPROXY_IPADDR=$(cat /vagrant/haproxy-node)
+       sudo sh -c "echo '${HAPROXY_IPADDR} ucp.local dtr.local' >> /etc/hosts"
        docker swarm join --token ${SWARM_JOIN_TOKEN_WORKER} ${UCP_IPADDR}:2377
        # Join DTR as a replica
        curl -k https://${UCP_IPADDR}/ca > ucp-ca.pem
-       docker run -it --rm docker/dtr:2.2.2 join --replica-id ${DTR_REPLICA_ID} --existing-replica-id ${EXISTING_DTR_REPLICA_ID} --ucp-url https://${UCP_IPADDR} --ucp-node ${WORKER_NODE_NAME} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)"
+       docker run -it --rm docker/dtr:2.2.2 join --replica-id ${DTR_REPLICA_ID} --existing-replica-id ${EXISTING_DTR_REPLICA_ID} --ucp-url https://ucp.local --ucp-node ${WORKER_NODE_NAME} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)"
        # Run backup of DTR
-       docker run --rm docker/dtr:2.2.2 backup --ucp-url https://${UCP_IPADDR} --existing-replica-id ${DTR_REPLICA_ID} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)" > /tmp/backup.tar
+       docker run --rm docker/dtr:2.2.2 backup --ucp-url https://ucp.local --existing-replica-id ${DTR_REPLICA_ID} --ucp-username admin --ucp-password ${UCP_PASSWORD} --ucp-ca "$(cat ucp-ca.pem)" > /tmp/backup.tar
        # Trust self-signed DTR CA
        openssl s_client -connect ${DTR_URL}:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM | sudo tee /usr/local/share/ca-certificates/${DTR_URL}.crt
        sudo update-ca-certificates

@@ -1,0 +1,4 @@
+zone "local" {
+    type master;
+    file "/etc/bind/zones/db.ddc"; # zone file path
+};

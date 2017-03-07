@@ -52,7 +52,7 @@ Vagrant.configure(2) do |config|
     end
     haproxy_node.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
-     sudo apt-get install -y apt-transport-https ca-certificates ntpdate
+     sudo apt-get install -y apt-transport-https ca-certificates ntpdate bind9 bind9utils bind9-doc
      sudo ntpdate -s time.nist.gov
      sudo apt-get install -y software-properties-common
      sudo add-apt-repository ppa:vbernat/haproxy-1.7
@@ -68,6 +68,9 @@ Vagrant.configure(2) do |config|
      sudo service rsyslog restart
      sudo cp /vagrant/files/haproxy.cfg /etc/haproxy/haproxy.cfg
      sudo service haproxy restart
+     # sudo sed -i '/^ExecStart:/ s/$/ -4/' /etc/systemd/systemd/bind9.service
+     # sudo systemctl daemon-reload
+     # sudo systemctl restart bind9
     SHELL
   end
 
@@ -97,7 +100,7 @@ Vagrant.configure(2) do |config|
        sudo sh -c "echo '${HAPROXY_IPADDR} ucp.local dtr.local' >> /etc/hosts"
        docker login -u ${HUB_USERNAME} -p ${HUB_PASSWORD}
        docker pull docker/ucp:2.1.0
-       docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp:2.1.0 install --host-address ${UCP_IPADDR} --admin-password ${UCP_PASSWORD} --san ucp.local --license $(cat /vagrant/docker_subscription.lic)
+       docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp:2.1.0 install --host-address ${UCP_IPADDR} --admin-password ${UCP_PASSWORD} --san ucp.local --license $(cat /vagrant/docker_subscription.lic) --dns ${HAPROXY_IPADDR}
        docker swarm join-token manager | awk -F " " '/token/ {print $2}' > /vagrant/swarm-join-token-mgr
        docker swarm join-token worker | awk -F " " '/token/ {print $2}' > /vagrant/swarm-join-token-worker
        docker run --rm --name ucp -v /var/run/docker.sock:/var/run/docker.sock docker/ucp:2.1.0 id | awk '{ print $1}' > /vagrant/ucp-vancouver-id

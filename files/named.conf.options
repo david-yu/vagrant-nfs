@@ -1,6 +1,6 @@
 acl "trusted" {
-        172.28.128.21;    # ns1 - can be set to localhost
         172.28.128.20;
+        172.28.128.21;    # ns1 - can be set to localhost
         172.28.128.22;
 };
 

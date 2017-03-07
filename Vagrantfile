@@ -68,9 +68,15 @@ Vagrant.configure(2) do |config|
      sudo service rsyslog restart
      sudo cp /vagrant/files/haproxy.cfg /etc/haproxy/haproxy.cfg
      sudo service haproxy restart
-     # sudo sed -i '/^ExecStart:/ s/$/ -4/' /etc/systemd/systemd/bind9.service
-     # sudo systemctl daemon-reload
-     # sudo systemctl restart bind9
+     sudo cp /vagrant/files/bind9 /etc/default/bind9
+     sudo systemctl daemon-reload
+     sudo systemctl restart bind9
+     sudo mkdir /etc/bind/zones
+     sudo cp /vagrant/files/db.ddc /etc/bind/zones/db.ddc
+     sudo cp /vagrant/files/named.conf.local /etc/bind/named.conf.local
+     sudp cp /vagrant/files/named.conf.options /etc/bind/named.conf.options
+     sudo named-checkconf
+     sudo systemctl restart bind9
     SHELL
   end
 

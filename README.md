@@ -48,7 +48,7 @@ sudo killall -HUP mDNSResponder
 ## Bring up/Resume NFS, UCP and DTR nodes
 Make sure to bring up `nfs-server-node` prior to bringing up the DTR nodes, since DTR relies on NFS for registry image storage.
 ```
-vagrant up nfs-server-node ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3 haproxy-node
+vagrant up nfs-server-node haproxy-node ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3
 ```
 
 ## Push sample image to DTR to test NFS

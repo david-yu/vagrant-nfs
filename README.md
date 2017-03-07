@@ -10,7 +10,7 @@ The following set of instructions helps Docker DataCenter across multiple vms wi
 * Worker node - DTR replica `dtr-nfs-node2` on 172.28.128.24
 * Worker node - DTR replica, `dtr-nfs-node3` on 172.28.128.25
 
-UCP traffic is proxied from `https://ucp.local` to 172.28.128.22. DTR traffic is load balanced from `https://dtr.local` to 172.28.128.23, 172.28.128.24, and 172.28.128.25. 
+UCP traffic is proxied from `https://ucp.local` to 172.28.128.22. DTR traffic is load balanced from `https://dtr.local` to 172.28.128.23, 172.28.128.24, and 172.28.128.25.
 
 ## Download vagrant from Vagrant website
 
@@ -35,7 +35,7 @@ vagrant plugin install vagrant-hostsupdater
 vagrant plugin install vagrant-multiprovider-snap
 ```
 
-## Point ucp.local and dtr.local to HAProxy ip addresses
+## Point ucp.local and dtr.local to HAProxy ip address
 ```
 # edit /etc/hosts on macOS
 sudo vi /private/etc/hosts
@@ -48,7 +48,7 @@ sudo killall -HUP mDNSResponder
 ## Bring up/Resume NFS, UCP and DTR nodes
 Make sure to bring up `nfs-server-node` prior to bringing up the DTR nodes, since DTR relies on NFS for registry image storage.
 ```
-vagrant up nfs-server-node haproxy-node ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3
+vagrant up nfs-server-node ucp-nfs-node1 dtr-nfs-node1 dtr-nfs-node2 dtr-nfs-node3 haproxy-node
 ```
 
 ## Push sample image to DTR to test NFS

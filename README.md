@@ -1,4 +1,4 @@
-Vagrant Virtualbox setup for CS Engine 1.13.1-cs2, UCP 2.1.0 and DTR 2.2.2 with NFS
+Vagrant Virtualbox setup for Docker EE 17.03, UCP 2.1.1 and DTR 2.2.3 with NFS
 ========================
 
 The following set of instructions helps Docker DataCenter across multiple vms with static ip addresses:
@@ -33,6 +33,14 @@ vagrant init ubuntu/xenial64
 ```
 vagrant plugin install vagrant-hostsupdater
 vagrant plugin install vagrant-multiprovider-snap
+```
+
+## Create files in project to store environment variables with custom values for use by Vagrant
+```
+hub_username
+hub_password
+ucp_password
+ee_url
 ```
 
 ## Point ucp.local and dtr.local to HAProxy ip address

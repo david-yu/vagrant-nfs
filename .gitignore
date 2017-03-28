@@ -1,6 +1,7 @@
 hub_password
 swarm-join-token-mgr
 swarm-join-token-worker
+ee_url
 *-id
 *-ipaddr
 *.tar

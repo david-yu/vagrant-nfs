@@ -13,41 +13,14 @@ Vagrant.configure(2) do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
 
-  # NFS node for DDC
-  config.vm.define "nfs-server-node" do |nfs_server_node1|
-    nfs_server_node1.vm.box = "ubuntu/xenial64"
-    nfs_server_node1.vm.network "private_network", ip: "172.28.128.20"
-    nfs_server_node1.vm.hostname = "nfs-server-node"
-    config.vm.provider :virtualbox do |vb|
-       vb.customize ["modifyvm", :id, "--memory", "1024"]
-       vb.customize ["modifyvm", :id, "--cpus", "1"]
-       vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-       vb.name = "nfs-server-node"
-    end
-    nfs_server_node1.vm.provision "shell", inline: <<-SHELL
-     sudo apt-get update
-     sudo apt-get install -y apt-transport-https ca-certificates ntpdate nfs-kernel-server
-     sudo ntpdate -s time.nist.gov
-     ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/nfs-server-node
-     export DTR_NODE1_IPADDR=172.28.128.23
-     export DTR_NODE2_IPADDR=172.28.128.24
-     export DTR_NODE3_IPADDR=172.28.128.25
-     sudo mkdir /var/nfs/dtr -p
-     sudo chown nobody:nogroup /var/nfs/dtr
-     sudo sh -c "echo '/var/nfs/dtr    ${DTR_NODE1_IPADDR}(rw,sync,no_subtree_check)  ${DTR_NODE2_IPADDR}(rw,sync,no_subtree_check) ${DTR_NODE3_IPADDR}(rw,sync,no_subtree_check)' >> /etc/exports"
-     sudo service nfs-kernel-server restart
-    SHELL
-  end
-
   # HAProxy node for DTR
   config.vm.define "haproxy-node" do |haproxy_node|
     haproxy_node.vm.box = "ubuntu/xenial64"
-    haproxy_node.vm.network "private_network", ip: "172.28.128.21"
+    haproxy_node.vm.network "private_network", ip: "172.28.128.20"
     haproxy_node.vm.hostname = "haproxy-node"
     config.vm.provider :virtualbox do |vb|
        vb.customize ["modifyvm", :id, "--memory", "1024"]
        vb.customize ["modifyvm", :id, "--cpus", "1"]
-       vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
        vb.name = "haproxy-node"
     end
     haproxy_node.vm.provision "shell", inline: <<-SHELL
@@ -80,6 +53,33 @@ Vagrant.configure(2) do |config|
     SHELL
   end
 
+  # NFS node for DDC
+  config.vm.define "nfs-server-node" do |nfs_server_node1|
+    nfs_server_node1.vm.box = "ubuntu/xenial64"
+    nfs_server_node1.vm.network "private_network", ip: "172.28.128.21"
+    nfs_server_node1.vm.hostname = "nfs-server-node"
+    config.vm.provider :virtualbox do |vb|
+       vb.customize ["modifyvm", :id, "--memory", "1024"]
+       vb.customize ["modifyvm", :id, "--cpus", "1"]
+       vb.name = "nfs-server-node"
+    end
+    nfs_server_node1.vm.provision "shell", inline: <<-SHELL
+     sudo apt-get update
+     sudo apt-get install -y apt-transport-https ca-certificates ntpdate nfs-kernel-server
+     sudo ntpdate -s time.nist.gov
+     sudo sh -c "echo 'dns-nameservers 172.28.128.20 8.8.8.8\ndns-search local' >> /etc/network/interfaces"
+     sudo ifdown --force enp0s8 && sudo ip addr flush dev enp0s8 && sudo ifup --force enp0s8
+     ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}' > /vagrant/nfs-server-node
+     export DTR_NODE1_IPADDR=172.28.128.23
+     export DTR_NODE2_IPADDR=172.28.128.24
+     export DTR_NODE3_IPADDR=172.28.128.25
+     sudo mkdir /var/nfs/dtr -p
+     sudo chown nobody:nogroup /var/nfs/dtr
+     sudo sh -c "echo '/var/nfs/dtr    ${DTR_NODE1_IPADDR}(rw,sync,no_subtree_check)  ${DTR_NODE2_IPADDR}(rw,sync,no_subtree_check) ${DTR_NODE3_IPADDR}(rw,sync,no_subtree_check)' >> /etc/exports"
+     sudo service nfs-kernel-server restart
+    SHELL
+  end
+
   # UCP 2.1 node for DDC
     config.vm.define "ucp-nfs-node1" do |ucp_nfs_node1|
       ucp_nfs_node1.vm.box = "ubuntu/xenial64"
@@ -88,13 +88,14 @@ Vagrant.configure(2) do |config|
       config.vm.provider :virtualbox do |vb|
          vb.customize ["modifyvm", :id, "--memory", "2048"]
          vb.customize ["modifyvm", :id, "--cpus", "2"]
-         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
          vb.name = "ucp-nfs-node1"
       end
       ucp_nfs_node1.vm.provision "shell", inline: <<-SHELL
        sudo apt-get update
        sudo apt-get install -y apt-transport-https ca-certificates ntpdate nfs-common
        sudo ntpdate -s time.nist.gov
+       sudo sh -c "echo 'dns-nameservers 172.28.128.20 8.8.8.8\ndns-search local' >> /etc/network/interfaces"
+       sudo ifdown --force enp0s8 && sudo ip addr flush dev enp0s8 && sudo ifup --force enp0s8
        export DOCKER_EE_URL=$(cat /vagrant/ee_url)
        sudo curl -fsSL ${DOCKER_EE_URL}/gpg | sudo apt-key add
        sudo add-apt-repository "deb [arch=amd64] ${DOCKER_EE_URL} $(lsb_release -cs) stable-17.03"
@@ -129,13 +130,14 @@ Vagrant.configure(2) do |config|
       config.vm.provider :virtualbox do |vb|
          vb.customize ["modifyvm", :id, "--memory", "2048"]
          vb.customize ["modifyvm", :id, "--cpus", "2"]
-         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
          vb.name = "dtr-nfs-node1"
       end
       dtr_nfs_node1.vm.provision "shell", inline: <<-SHELL
         sudo apt-get update
         sudo apt-get install -y apt-transport-https ca-certificates ntpdate nfs-common
         sudo ntpdate -s time.nist.gov
+        sudo sh -c "echo 'dns-nameservers 172.28.128.20 8.8.8.8\ndns-search local' >> /etc/network/interfaces"
+        sudo ifdown --force enp0s8 && sudo ip addr flush dev enp0s8 && sudo ifup --force enp0s8
         export DOCKER_EE_URL=$(cat /vagrant/ee_url)
         sudo curl -fsSL ${DOCKER_EE_URL}/gpg | sudo apt-key add
         sudo add-apt-repository "deb [arch=amd64] ${DOCKER_EE_URL} $(lsb_release -cs) stable-17.03"
@@ -193,6 +195,8 @@ Vagrant.configure(2) do |config|
        sudo apt-get update
        sudo apt-get install -y apt-transport-https ca-certificates ntpdate nfs-common
        sudo ntpdate -s time.nist.gov
+       sudo sh -c "echo 'dns-nameservers 172.28.128.20 8.8.8.8\ndns-search local' >> /etc/network/interfaces"
+       sudo ifdown --force enp0s8 && sudo ip addr flush dev enp0s8 && sudo ifup --force enp0s8
        export DOCKER_EE_URL=$(cat /vagrant/ee_url)
        sudo curl -fsSL ${DOCKER_EE_URL}/gpg | sudo apt-key add
        sudo add-apt-repository "deb [arch=amd64] ${DOCKER_EE_URL} $(lsb_release -cs) stable-17.03"
@@ -244,6 +248,8 @@ Vagrant.configure(2) do |config|
        sudo apt-get update
        sudo apt-get install -y apt-transport-https ca-certificates ntpdate nfs-common
        sudo ntpdate -s time.nist.gov
+       sudo sh -c "echo 'dns-nameservers 172.28.128.20 8.8.8.8\ndns-search local' >> /etc/network/interfaces"
+       sudo ifdown --force enp0s8 && sudo ip addr flush dev enp0s8 && sudo ifup --force enp0s8
        export DOCKER_EE_URL=$(cat /vagrant/ee_url)
        sudo curl -fsSL ${DOCKER_EE_URL}/gpg | sudo apt-key add
        sudo add-apt-repository "deb [arch=amd64] ${DOCKER_EE_URL} $(lsb_release -cs) stable-17.03"
